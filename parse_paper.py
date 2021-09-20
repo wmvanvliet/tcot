@@ -18,15 +18,21 @@ def parse_paragraph(parser, elem):
     references = []
     for event, elem in parser.read_events():
         if elem.tag.endswith('para') and event == 'end':
-            text += elem.text.strip()
+            if elem.tail:
+                text += elem.tail.strip()
             break;
         elif elem.tag.endswith('cross-ref') and event == 'start':
-            references.append(parse_cross_ref(parser, elem))
-        elif elem.text:
-            text += elem.text.strip()
+            reference, tail = parse_cross_ref(parser, elem)
+            references.append(reference)
+            if tail:
+                text += tail
+        elif event == 'end':
+            if elem.tail:
+                text += elem.tail.strip()
     return text, references
 
 def parse_cross_ref(parser, elem):
-    return elem.attrib
+    return elem.attrib, elem.tail
 
-paragraphs = parse_document('./paper.xml')
+#breakpoint()
+paragraphs = parse_document('./snippet.xml')
